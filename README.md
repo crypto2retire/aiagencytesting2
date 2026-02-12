@@ -10,6 +10,10 @@ Client → Researcher → Strategist → Review Dashboard → (Later: Publisher)
 
 Each agent does one job, saves to the database, and exits. No agent talks to another — the database is the glue.
 
+## Deploy to Streamlit Cloud
+
+Git ready. See **[DEPLOY.md](DEPLOY.md)** for GitHub + Streamlit Community Cloud deployment.
+
 ## Quick Start
 
 ```bash
