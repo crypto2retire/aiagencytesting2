@@ -1,0 +1,8 @@
+# Streamlit config
+# For remote access: use run_remote.sh or add --server.address 0.0.0.0
+
+[server]
+port = 8501
+
+[browser]
+gatherUsageStats = false

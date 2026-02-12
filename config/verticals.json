@@ -1,0 +1,53 @@
+{
+  "junk_removal": {
+    "average_job_value": 350,
+    "core_services": ["junk removal", "cleanout", "dumpster rental"],
+    "niche": "Junk Removal",
+    "negative_keywords": "negative_keywords.json",
+    "excluded_from_content": ["e-waste removal", "scrap removal", "scrap metal removal"],
+    "opportunity_services": [
+      "hot tub removal",
+      "appliance removal",
+      "shed removal",
+      "estate cleanout",
+      "garage cleanout",
+      "construction debris",
+      "mattress removal",
+      "furniture removal",
+      "basement cleanout",
+      "moving debris"
+    ]
+  },
+  "plumbing": {
+    "average_job_value": 425,
+    "core_services": ["plumber", "drain cleaning", "water heater"],
+    "niche": "Plumber",
+    "negative_keywords": "negative_keywords_plumbing.json",
+    "opportunity_services": [
+      "drain cleaning",
+      "water heater repair",
+      "pipe repair",
+      "leak repair",
+      "sewer line",
+      "toilet repair",
+      "water line",
+      "emergency plumber"
+    ]
+  },
+  "hvac": {
+    "average_job_value": 650,
+    "core_services": ["ac repair", "furnace repair", "hvac installation"],
+    "niche": "HVAC",
+    "negative_keywords": "negative_keywords_hvac.json",
+    "opportunity_services": [
+      "ac repair",
+      "furnace repair",
+      "hvac installation",
+      "duct cleaning",
+      "thermostat",
+      "air conditioning",
+      "heating repair",
+      "hvac maintenance"
+    ]
+  }
+}

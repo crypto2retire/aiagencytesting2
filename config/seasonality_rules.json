@@ -1,0 +1,20 @@
+{
+  "junk_removal": {
+    "spring": ["spring cleanout", "garage cleanout", "yard debris"],
+    "summer": ["construction debris", "renovation cleanup", "dumpster rental"],
+    "fall": ["move out junk", "estate cleanout"],
+    "winter": ["hoarding cleanup", "basement cleanout"]
+  },
+  "plumbing": {
+    "spring": ["water heater", "pipe repair"],
+    "summer": ["drain cleaning", "sewer line"],
+    "fall": ["water heater repair", "leak repair"],
+    "winter": ["emergency plumber", "frozen pipe"]
+  },
+  "hvac": {
+    "spring": ["ac repair", "hvac maintenance"],
+    "summer": ["ac repair", "air conditioning", "duct cleaning"],
+    "fall": ["furnace repair", "heating repair"],
+    "winter": ["furnace repair", "heating repair", "emergency hvac"]
+  }
+}

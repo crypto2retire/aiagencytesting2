@@ -1,0 +1,470 @@
+{
+  "furniture removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 11,
+    "avg_confidence": 0.75
+  },
+  "mattress disposal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "electronics disposal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "scrap metal disposal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "tv removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "couch removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "tire disposal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "junk removal oshkosh wi": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "junk removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 5,
+    "avg_confidence": 0.75
+  },
+  "appliance removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 8,
+    "avg_confidence": 0.75
+  },
+  "estate cleanout": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "construction debris removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "yard waste removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "proper disposal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "same day pickup oshkosh wi": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "same day junk removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "electronics removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 4,
+    "avg_confidence": 0.75
+  },
+  "e-waste disposal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "bed removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "box spring removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "exercise equipment removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "shed cleanout": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "playset removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "paper recycling": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "cardboard removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "garage cleanout": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "kitchen item removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "knickknack removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "linen removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "piano removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "hot tub removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "electronics recycling": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "appliance disposal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "residential junk removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "commercial junk removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "yard waste cleanup": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "junk pickup": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "full garage cleanout": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "dumpster bag pickup": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "storage unit clean out": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "clean outs": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "3 yard recycling bins rental": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "debris removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "construction cleanup": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "garage cleanout sarasota fl": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "storage unit cleanouts": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "junk removal sarasota fl": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 4,
+    "avg_confidence": 0.94
+  },
+  "same day pickup": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "junk removal old furniture cleanouts": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "yard clean up debris": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "commercial office space clean out": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "storage unit clean outs": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "hoarder house clean outs": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "eviction clean outs": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "construction clean up": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "garage clean outs": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "foreclosure clean outs": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "trash removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "dumpster overflow removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "attic clean outs": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "storage unit cleanout": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "clean out sarasota fl": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "recycling bins rental": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "mobile junk removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "old furniture removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 2,
+    "avg_confidence": 0.75
+  },
+  "same day pickup sarasota fl": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "commercial office space cleanouts": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "construction clean ups": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "garage clean out": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "oshkosh disposal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.92
+  },
+  "oshkosh recycling": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.92
+  },
+  "yard waste collection": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "electronic waste disposal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "office cleanouts": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "garage cleanup": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "basement clearing": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "recycling donation": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "garage cleanout sarasota": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.92
+  }
+}

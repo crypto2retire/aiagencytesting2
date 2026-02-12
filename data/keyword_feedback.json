@@ -1,0 +1,15 @@
+{
+  "valid": [
+    "junk removal",
+    "garage cleanout",
+    "appliance removal",
+    "estate cleanout",
+    "hot tub removal"
+  ],
+  "invalid": [
+    "professional service",
+    "friendly team",
+    "quality work",
+    "family owned"
+  ]
+}
