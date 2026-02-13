@@ -44,7 +44,11 @@ def run_researcher(client_id: str, city: str = None) -> tuple[bool, str]:
         finally:
             db.close()
         if count == 0:
-            return False, "No research saved. Check Tavily API key, ensure client has cities_served, and see logs/researcher.log"
+            return False, (
+                "No research saved. Tavily returned no competitors for this city. "
+                "Check: (1) TAVILY_API_KEY is set correctly in Streamlit Secrets, "
+                "(2) client has cities_served, (3) try a different city."
+            )
         return True, f"Research complete ({count} entries). Review logs, then run Strategist."
     except Exception as e:
         return False, str(e)

@@ -43,13 +43,15 @@ def has_real_website(url: str) -> bool:
 
 
 def _do_tavily_search(query: str, max_results: int) -> List[Dict]:
-    """Inner Tavily search."""
+    """Inner Tavily search. Raises on API errors (e.g. invalid key)."""
     from tavily import TavilyClient
     client = TavilyClient(api_key=TAVILY_API_KEY)
     response = client.search(query, max_results=max_results, search_depth=TAVILY_SEARCH_DEPTH)
     results = []
     if isinstance(response, dict):
         results = response.get("results", [])
+        if not results and response.get("error"):
+            raise ValueError(f"Tavily API error: {response.get('error')}")
     elif hasattr(response, "results"):
         results = getattr(response, "results", None) or []
     return results if isinstance(results, list) else []
@@ -63,26 +65,27 @@ def find_local_competitors(
     """
     Tavily search for local competitors.
     Returns list of {name, url, content} dicts.
+    Raises on API errors so the user sees the actual Tavily/API key message.
     """
     max_results = min(max_results or TAVILY_MAX_RESULTS, TAVILY_MAX_RESULTS)
     query = f"{business_type} {city}"
-    try:
-        results = _do_tavily_search(query, max_results)
-        competitors = []
-        seen = set()
-        for r in results:
-            if not isinstance(r, dict):
-                continue
-            name = (r.get("title") or r.get("name") or "").strip()
-            url = (r.get("url") or r.get("link") or "").strip()
-            content = (r.get("content") or r.get("snippet") or "").strip()
-            if name and name not in seen:
-                seen.add(name)
-                competitors.append({"name": name, "url": url, "content": content})
-        return competitors
-    except Exception as e:
-        log.warning(f"Tavily find_local_competitors failed: {e}")
-        return []
+    if not TAVILY_API_KEY or not TAVILY_API_KEY.strip():
+        raise ValueError(
+            "TAVILY_API_KEY is not set. Add it in .env (local) or Streamlit Cloud: Manage app → Settings → Secrets."
+        )
+    results = _do_tavily_search(query, max_results)
+    competitors = []
+    seen = set()
+    for r in results:
+        if not isinstance(r, dict):
+            continue
+        name = (r.get("title") or r.get("name") or "").strip()
+        url = (r.get("url") or r.get("link") or "").strip()
+        content = (r.get("content") or r.get("snippet") or "").strip()
+        if name and name not in seen:
+            seen.add(name)
+            competitors.append({"name": name, "url": url, "content": content})
+    return competitors
 
 
 def tavily_search(query: str, max_results: int = 10) -> List[Dict]:

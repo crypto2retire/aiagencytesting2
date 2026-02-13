@@ -734,15 +734,15 @@ def main():
         1. Open your app
         2. Click **Manage app** (lower right)
         3. Go to **Settings** → **Secrets**
-        4. Add these keys:
+        4. Add these keys (use quotes around values):
 
         ```
-        TAVILY_API_KEY = your-tavily-api-key
-        FIRECRAWL_API_KEY = your-firecrawl-api-key
-        ANTHROPIC_API_KEY = your-anthropic-api-key
+        TAVILY_API_KEY = "tvly-xxxx"
+        FIRECRAWL_API_KEY = "fc-xxxx"
+        ANTHROPIC_API_KEY = "sk-ant-xxxx"
         ```
 
-        5. Save and redeploy.
+        5. Save and redeploy. Get keys: [Tavily](https://tavily.com) · [Firecrawl](https://firecrawl.dev) · [Anthropic](https://console.anthropic.com)
 
         **Locally:** Copy `.env.example` to `.env` and fill in the values.
         """)
