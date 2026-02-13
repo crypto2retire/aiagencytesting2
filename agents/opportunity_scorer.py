@@ -4,8 +4,9 @@ Opportunity Scoring Agent — easy wins ranking.
 Turns raw competitor research into prioritized, low-effort / high-impact content
 opportunities. Answers: "What should this business post FIRST to get traction fastest?"
 
-Scoring: confidence + geo + novelty + competitor gap. Transparent for client trust.
-Formula: (confidence*0.5) + (geo_bonus*0.3) + (novelty_bonus*0.2) → 0-100
+Scoring: confidence + geo + novelty + competitor gap + opportunity signals.
+Prioritizes: low-quality sites ranking well, missing service-city, high-freq unused keywords, weak conversion.
+Formula: base (confidence*0.5 + geo*0.3 + novelty*0.2) + bonuses for opportunity signals.
 """
 
 import datetime
@@ -25,6 +26,26 @@ from config import OPPORTUNITY_LOG
 N_RECENT_RUNS = 2  # Duplication guard: same service+geo cannot be recommended in last N runs
 MIN_UNIQUE_RESULTS = 3  # Never return fewer than 3 unless data insufficient
 
+# Confidence tiers for opportunity prioritization
+TIER_NEAR_TERM = "near_term"      # confidence > 0.65 — near-term wins
+TIER_GROWTH = "growth"            # confidence 0.4–0.65 — growth plays
+TIER_EXPERIMENTAL = "experimental"  # confidence < 0.4 — experimental content
+
+
+def _confidence_tier(confidence: float) -> str:
+    """Map confidence (0-1) to tier. Higher tier = higher sort priority."""
+    if confidence > 0.65:
+        return TIER_NEAR_TERM
+    if confidence >= 0.4:
+        return TIER_GROWTH
+    return TIER_EXPERIMENTAL
+
+
+def _tier_sort_priority(tier: str) -> int:
+    """Lower = higher priority when sorting."""
+    return {"near_term": 0, "growth": 1, "experimental": 2}.get(tier, 2)
+
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -36,6 +57,100 @@ INTENT_KEYWORDS = [
     "removal", "pickup", "haul", "hauling", "cleanout", "dispose",
 ]
 
+
+
+def _bonus_low_quality_dominators(logs: List, service: str) -> float:
+    """
+    Bonus when competitors mentioning this service have low website_quality_score.
+    Low-quality sites ranking = easy to outrank. Returns 0-8.
+    """
+    mentioners = []
+    for rl in logs:
+        services = [str(s).lower() for s in (rl.extracted_services or [])]
+        if (service or "").lower() in services and rl.website_quality_score is not None:
+            mentioners.append(rl.website_quality_score)
+    if not mentioners:
+        return 0.0
+    avg = sum(mentioners) / len(mentioners)
+    if avg < 40:
+        return 8.0
+    if avg < 55:
+        return 5.0
+    if avg < 70:
+        return 2.0
+    return 0.0
+
+
+def _bonus_missing_service_city(logs: List, service: str, geo: str) -> float:
+    """
+    Bonus when no competitor has service+city in service_city_phrases.
+    Missing geo coverage = wide-open opportunity. Returns 0-8.
+    """
+    if not service or not geo:
+        return 0.0
+    svc_lower = service.lower()
+    geo_lower = (geo or "").strip().lower()
+    if not geo_lower:
+        return 0.0
+    for rl in logs:
+        phrases = [str(p).lower() for p in (rl.extracted_profile or {}).get("service_city_phrases") or []]
+        for p in phrases:
+            if svc_lower in p and geo_lower in p:
+                return 0.0  # Someone covers it
+    return 8.0  # Nobody has service+city
+
+
+def _bonus_high_freq_unused(db, client_id: str, service: str, geo: str, competitor_count: int) -> float:
+    """
+    Bonus when keywords matching service have high frequency but low competitor coverage.
+    High search interest, underused by competitors. Returns 0-8.
+    """
+    if not service:
+        return 0.0
+    kws = db.query(KeywordIntelligence).filter(
+        or_(KeywordIntelligence.client_id == client_id, KeywordIntelligence.region == geo),
+        KeywordIntelligence.keyword.like(f"%{service}%"),
+    ).all()
+    if not kws:
+        return 0.0
+    total_freq = sum(k.frequency or 0 for k in kws)
+    avg_conf = sum(float(k.confidence_score or 0) for k in kws) / len(kws)
+    if avg_conf <= 1:
+        avg_conf *= 100
+    # "Unused" = high freq + few competitors targeting it
+    unused_boost = 2.0 if competitor_count < 2 else 0.0  # Extra when very low competition
+    # High freq + high confidence = strong signal
+    if total_freq >= 8 and avg_conf >= 70:
+        return min(8.0, 6.0 + unused_boost)
+    if total_freq >= 5 and avg_conf >= 50:
+        return min(8.0, 4.0 + unused_boost)
+    if total_freq >= 3:
+        return 2.0 + (unused_boost * 0.5)
+    return 0.0
+
+
+def _bonus_weak_conversion_readiness(logs: List, service: str) -> float:
+    """
+    Bonus when competitors mentioning this service have few/no CTAs.
+    Weak conversion = room to differentiate with strong CTAs. Returns 0-6.
+    """
+    mentioners_ctas = []
+    for rl in logs:
+        services = [str(s).lower() for s in (rl.extracted_services or [])]
+        if (service or "").lower() not in services:
+            continue
+        profile = rl.extracted_profile or {}
+        ctas = profile.get("calls_to_action") or []
+        n_ctas = len([c for c in ctas if c and isinstance(c, str)])
+        mentioners_ctas.append(n_ctas)
+    if not mentioners_ctas:
+        return 0.0
+    avg_ctas = sum(mentioners_ctas) / len(mentioners_ctas)
+    if avg_ctas == 0:
+        return 6.0
+    if avg_ctas < 1.5:
+        return 3.0
+    return 0.0
 
 
 def _get_keyword_confidence(db, client_id: str, service: str, geo: str) -> float:
@@ -53,7 +168,8 @@ def _get_keyword_confidence(db, client_id: str, service: str, geo: str) -> float
         return 0.5  # default when no keyword data
     best = 0.0
     for k in kws:
-        raw = (k.confidence_score or 0) / 100.0
+        raw = float(k.confidence_score or 0)
+        raw = raw / 100.0 if raw > 1 else raw  # Normalize: legacy 0-100 vs new 0-1
         decay = get_decay_factor(k.keyword or "")
         effective = raw * decay
         best = max(best, effective)
@@ -187,13 +303,16 @@ def score_opportunities(client_id: str) -> List[dict]:
 
             # Duplicate guard: same service+geo in last N runs → near zero
             if _is_recently_recommended(db, client_id, service, geo):
-                why = _generate_why_recommended(0.5, has_geo, competitor_count, is_novel=False, client_seasonality=seasonality)
+                confidence = 0.5
+                why = _generate_why_recommended(confidence, has_geo, competitor_count, is_novel=False, client_seasonality=seasonality) or {}
                 seas = check_seasonality(service, industry=vertical)
-                why["timing"] = _apply_seasonality_to_timing(why["timing"], seas, has_client_note=bool(seasonality))
+                why["timing"] = _apply_seasonality_to_timing(why.get("timing", "Aligned with current search demand"), seas, has_client_note=bool(seasonality))
                 opportunities.append({
                     "service": service,
                     "competitor_mentions": competitor_count,
                     "score": 1,
+                    "confidence_score": confidence,
+                    "tier": _confidence_tier(confidence),
                     "duplicate": True,
                     "why_recommended": why,
                     "seasonality": seas,
@@ -210,6 +329,12 @@ def score_opportunities(client_id: str) -> List[dict]:
             raw_score = (confidence * 0.5) + (geo_bonus * 0.3) + (novelty_bonus * 0.2)
             score = int(round(raw_score * 100))
 
+            # Opportunity bonuses: prioritize easy wins
+            score += int(round(_bonus_low_quality_dominators(logs, service)))
+            score += int(round(_bonus_missing_service_city(logs, service, geo)))
+            score += int(round(_bonus_high_freq_unused(db, client_id, service, geo, competitor_count)))
+            score += int(round(_bonus_weak_conversion_readiness(logs, service)))
+
             # Legacy: light penalty for high competitor mentions
             score = max(0, score - competitor_count * 5)
             if any(k in service for k in INTENT_KEYWORDS):
@@ -220,18 +345,21 @@ def score_opportunities(client_id: str) -> List[dict]:
             if seas.get("match"):
                 score = min(100, int(round(score * (1 + seas.get("boost_applied", 0)))))
 
-            why = _generate_why_recommended(confidence, has_geo, competitor_count, is_novel=True, client_seasonality=seasonality)
-            why["timing"] = _apply_seasonality_to_timing(why["timing"], seas, has_client_note=bool(seasonality))
+            why = _generate_why_recommended(confidence, has_geo, competitor_count, is_novel=True, client_seasonality=seasonality) or {}
+            why["timing"] = _apply_seasonality_to_timing(why.get("timing", "Aligned with current search demand"), seas, has_client_note=bool(seasonality))
 
             opportunities.append({
                 "service": service,
                 "competitor_mentions": competitor_count,
                 "score": max(score, 1),
+                "confidence_score": confidence,
+                "tier": _confidence_tier(confidence),
                 "why_recommended": why,
                 "seasonality": seas,
             })
 
-        opportunities.sort(key=lambda x: x["score"], reverse=True)
+        # Sort: tier first (near-term > growth > experimental), then by score desc
+        opportunities.sort(key=lambda x: (_tier_sort_priority(x.get("tier", TIER_EXPERIMENTAL)), -x["score"]))
         unique_by_score = [o for o in opportunities if not o.get("duplicate", False)]
         if len(unique_by_score) < MIN_UNIQUE_RESULTS:
             log.warning(f"Only {len(unique_by_score)} unique opportunities (data insufficient for {MIN_UNIQUE_RESULTS})")

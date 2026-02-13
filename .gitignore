@@ -7,4 +7,5 @@ logs/*.log
 .venv/
 venv/
 proposals/*.md
+exports/
 .cursor/

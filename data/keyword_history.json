@@ -50,19 +50,19 @@
   "junk removal": {
     "first_seen": "2026-02-12",
     "last_seen": "2026-02-12",
-    "usage_count": 5,
+    "usage_count": 11,
     "avg_confidence": 0.75
   },
   "appliance removal": {
     "first_seen": "2026-02-12",
     "last_seen": "2026-02-12",
-    "usage_count": 8,
+    "usage_count": 9,
     "avg_confidence": 0.75
   },
   "estate cleanout": {
     "first_seen": "2026-02-12",
     "last_seen": "2026-02-12",
-    "usage_count": 3,
+    "usage_count": 4,
     "avg_confidence": 0.75
   },
   "construction debris removal": {
@@ -152,7 +152,7 @@
   "garage cleanout": {
     "first_seen": "2026-02-12",
     "last_seen": "2026-02-12",
-    "usage_count": 3,
+    "usage_count": 4,
     "avg_confidence": 0.75
   },
   "kitchen item removal": {
@@ -182,7 +182,7 @@
   "hot tub removal": {
     "first_seen": "2026-02-12",
     "last_seen": "2026-02-12",
-    "usage_count": 2,
+    "usage_count": 3,
     "avg_confidence": 0.75
   },
   "electronics recycling": {
@@ -200,13 +200,13 @@
   "residential junk removal": {
     "first_seen": "2026-02-12",
     "last_seen": "2026-02-12",
-    "usage_count": 2,
+    "usage_count": 6,
     "avg_confidence": 0.75
   },
   "commercial junk removal": {
     "first_seen": "2026-02-12",
     "last_seen": "2026-02-12",
-    "usage_count": 2,
+    "usage_count": 6,
     "avg_confidence": 0.75
   },
   "yard waste cleanup": {
@@ -230,7 +230,7 @@
   "dumpster bag pickup": {
     "first_seen": "2026-02-12",
     "last_seen": "2026-02-12",
-    "usage_count": 2,
+    "usage_count": 6,
     "avg_confidence": 0.75
   },
   "storage unit clean out": {
@@ -466,5 +466,131 @@
     "last_seen": "2026-02-12",
     "usage_count": 1,
     "avg_confidence": 0.92
+  },
+  "junk hauling": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "junk removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 5,
+    "avg_confidence": 0.94
+  },
+  "fence removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 4,
+    "avg_confidence": 0.75
+  },
+  "valet trash": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 3,
+    "avg_confidence": 0.75
+  },
+  "junk": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "removal": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "scrappys": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "hauling": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.75
+  },
+  "multiple item removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "single item removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "bbq removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "bed mattress removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "bed frame removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "recliner chair removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "dresser removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "piano removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "refrigerator removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "sofa removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "treadmill removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "washer removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
+  },
+  "dryer removal charlotte nc": {
+    "first_seen": "2026-02-12",
+    "last_seen": "2026-02-12",
+    "usage_count": 1,
+    "avg_confidence": 0.94
   }
 }

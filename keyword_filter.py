@@ -5,12 +5,33 @@ Scores rank keywords: high-confidence money terms vs experimental phrases.
 Geo phrase detection: normalize city+state to {service} {city} {state_abbrev}.
 
 Industry-specific negative keywords: junk terms never enter scoring, learning, or recommendations.
+
+Keyword Confidence (weighted factors, 0.0–1.0):
+- frequency_weight = 0.30   (frequency across competitors)
+- source_quality_weight = 0.25 (website quality of sources)
+- keyword_type_weight = 0.20 (service_city > seo > geo)
+- competitor_strength_weight = 0.15 (presence in top competitors)
+- recency_weight = 0.10     (still relevant?)
 """
 
 import json
+import math
 import re
+from datetime import datetime
 from pathlib import Path
-from typing import Iterable, Optional, Set
+from typing import Any, Iterable, Optional, Set
+
+# Weighted confidence factors (design doc 1.2)
+# Keyword confidence: frequency, title/H1 presence, geo relevance, low competition
+FREQUENCY_WEIGHT = 0.30
+TITLE_H1_WEIGHT = 0.25
+GEO_RELEVANCE_WEIGHT = 0.25
+LOW_COMPETITION_WEIGHT = 0.20
+# Legacy (for backward compat in compute_keyword_confidence_weighted)
+SOURCE_QUALITY_WEIGHT = 0.25
+KEYWORD_TYPE_WEIGHT = 0.20
+COMPETITOR_STRENGTH_WEIGHT = 0.15
+RECENCY_WEIGHT = 0.10
 
 from services_taxonomy import SERVICE_NOUNS, SERVICE_VERBS, EXCLUDED_TERMS
 
@@ -193,6 +214,141 @@ def score_keyword(
         score += 10
 
     return min(score, 100)
+
+
+def _normalize_frequency(frequency: int, max_frequency: int = 20) -> float:
+    """Normalize frequency 0–1. Cap at max_frequency for scale."""
+    if frequency <= 0:
+        return 0.0
+    if max_frequency <= 0:
+        return 1.0
+    return min(1.0, frequency / max_frequency)
+
+
+def _get_attr(row: Any, name: str, default: Any = None) -> Any:
+    """Get attribute from row (object or dict)."""
+    if hasattr(row, name):
+        return getattr(row, name)
+    if isinstance(row, dict):
+        return row.get(name, default)
+    return default
+
+
+def calculate_keyword_confidence(keyword_row: Any) -> float:
+    """
+    Compute keyword confidence 0.0–1.0 using:
+    - Frequency across competitors
+    - Presence in titles/H1s
+    - Geo relevance (city/service match)
+    - Low competition indicators
+
+    confidence =
+      frequency_score * 0.30 +
+      title_h1_score * 0.25 +
+      geo_relevance * 0.25 +
+      low_competition * 0.20
+    """
+    freq = int(_get_attr(keyword_row, "frequency", 0) or 0)
+    in_title = int(_get_attr(keyword_row, "in_title_h1_count", 0) or 0)
+    type_weight = float(_get_attr(keyword_row, "keyword_type_weight", 0.5) or 0.5)
+    top_count = int(_get_attr(keyword_row, "top_competitor_count", 0) or 0)
+    avg_qual_raw = float(_get_attr(keyword_row, "avg_source_quality", 0) or 0)
+
+    # 1. Frequency across competitors — log scale 0–1
+    FREQ_MAX = 50
+    frequency_score = math.log10(1 + max(0, freq)) / math.log10(1 + FREQ_MAX)
+    frequency_score = min(1.0, frequency_score)
+
+    # 2. Presence in titles/H1s — in_title_h1_count sources have keyword in title
+    #    Normalize: 1+ sources = some boost, 3+ = strong signal
+    TITLE_MAX = 5
+    title_h1_score = min(1.0, in_title / TITLE_MAX) if in_title else 0.0
+
+    # 3. Geo relevance — service_city > seo > geo (city/service match)
+    geo_relevance = max(0.0, min(1.0, type_weight))
+
+    # 4. Low competition — fewer competitors with this keyword = easier to rank
+    #    top_competitor_count low = low competition = opportunity
+    #    Also: low avg source quality of competitors = weak sites = easier to outrank
+    comp_presence = min(1.0, top_count / 5.0) if top_count else 0.0
+    low_competition = 1.0 - comp_presence
+    # Bonus: if competitors have low site quality (avg < 50), it's easier
+    avg_qual = avg_qual_raw / 100.0 if avg_qual_raw > 1 else avg_qual_raw
+    if avg_qual > 0 and avg_qual < 0.5:
+        low_competition = min(1.0, low_competition + 0.2)  # weak competitors = opportunity
+
+    confidence = (
+        frequency_score * FREQUENCY_WEIGHT +
+        title_h1_score * TITLE_H1_WEIGHT +
+        geo_relevance * GEO_RELEVANCE_WEIGHT +
+        low_competition * LOW_COMPETITION_WEIGHT
+    )
+    return max(0.0, min(1.0, confidence))
+
+
+def get_keyword_type_weight(keyword_type: Optional[str]) -> float:
+    """service_city=1.0, seo=0.7, geo=0.4. Returns 0–1."""
+    t = (keyword_type or "").strip().lower()
+    if t in ("service_city", "service_geo"):
+        return 1.0
+    if t == "seo":
+        return 0.7
+    if t == "geo":
+        return 0.4
+    if t in ("service", "modifier", "long_tail"):
+        return 0.6
+    return 0.5
+
+
+def _recency_score(last_seen: Optional[object]) -> float:
+    """Still relevant? Recent = higher. Returns 0–1."""
+    if last_seen is None:
+        return 1.0
+    if isinstance(last_seen, datetime):
+        days = (datetime.utcnow() - last_seen).days
+    else:
+        try:
+            dt = datetime.strptime(str(last_seen)[:10], "%Y-%m-%d")
+            days = (datetime.utcnow() - dt).days
+        except Exception:
+            return 0.7
+    if days < 7:
+        return 1.0
+    if days < 30:
+        return 0.85
+    if days < 90:
+        return 0.6
+    return 0.3
+
+
+def compute_keyword_confidence_weighted(
+    *,
+    frequency: int = 0,
+    max_frequency: int = 20,
+    source_quality: Optional[float] = None,
+    keyword_type: Optional[str] = None,
+    competitor_strength: Optional[float] = None,
+    recency_factor: Optional[float] = None,
+    last_seen: Optional[object] = None,
+) -> float:
+    """
+    Weighted confidence 0.0–1.0 using collected signals.
+    Missing factors use neutral 0.5. Final score is clamped.
+    """
+    freq_norm = _normalize_frequency(frequency, max_frequency)
+    type_score = get_keyword_type_weight(keyword_type)
+    quality = (source_quality / 100.0) if source_quality is not None else 0.5
+    strength = competitor_strength if competitor_strength is not None else 0.5
+    recency = recency_factor if recency_factor is not None else _recency_score(last_seen)
+
+    score = (
+        FREQUENCY_WEIGHT * freq_norm
+        + SOURCE_QUALITY_WEIGHT * quality
+        + KEYWORD_TYPE_WEIGHT * type_score
+        + COMPETITOR_STRENGTH_WEIGHT * strength
+        + RECENCY_WEIGHT * recency
+    )
+    return max(0.0, min(1.0, score))
 
 
 def score_keyword_confidence(

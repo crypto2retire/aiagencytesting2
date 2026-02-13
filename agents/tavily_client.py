@@ -1,9 +1,8 @@
 """
 Tavily client — competitor discovery and review-based fallback.
-
-Guards: max_results=5, search_depth=basic (no loops, no advanced on main).
 """
 
+import logging
 from typing import Dict, List
 
 from config import (
@@ -12,6 +11,19 @@ from config import (
     TAVILY_REVIEWS_MAX_RESULTS,
     TAVILY_SEARCH_DEPTH,
 )
+
+log = logging.getLogger(__name__)
+
+
+def reset_tavily_query_count() -> None:
+    """No-op; kept for API compatibility."""
+    pass
+
+
+def get_tavily_query_count() -> int:
+    """Returns 0; kept for API compatibility."""
+    return 0
+
 
 # URLs where we should NOT use Firecrawl — use reviews instead
 NON_WEBSITE_DOMAINS = (
@@ -30,6 +42,19 @@ def has_real_website(url: str) -> bool:
     return not any(d in url.lower() for d in NON_WEBSITE_DOMAINS)
 
 
+def _do_tavily_search(query: str, max_results: int) -> List[Dict]:
+    """Inner Tavily search."""
+    from tavily import TavilyClient
+    client = TavilyClient(api_key=TAVILY_API_KEY)
+    response = client.search(query, max_results=max_results, search_depth=TAVILY_SEARCH_DEPTH)
+    results = []
+    if isinstance(response, dict):
+        results = response.get("results", [])
+    elif hasattr(response, "results"):
+        results = getattr(response, "results", None) or []
+    return results if isinstance(results, list) else []
+
+
 def find_local_competitors(
     business_type: str,
     city: str,
@@ -38,26 +63,11 @@ def find_local_competitors(
     """
     Tavily search for local competitors.
     Returns list of {name, url, content} dicts.
-    Guard: max_results=5, search_depth=basic.
     """
     max_results = min(max_results or TAVILY_MAX_RESULTS, TAVILY_MAX_RESULTS)
+    query = f"{business_type} {city}"
     try:
-        from tavily import TavilyClient
-        client = TavilyClient(api_key=TAVILY_API_KEY)
-        query = f"{business_type} {city}"
-        response = client.search(
-            query,
-            max_results=max_results,
-            search_depth=TAVILY_SEARCH_DEPTH,
-        )
-        results = []
-        if isinstance(response, dict):
-            results = response.get("results", [])
-        elif hasattr(response, "results"):
-            results = getattr(response, "results", None) or []
-        if not isinstance(results, list):
-            return []
-
+        results = _do_tavily_search(query, max_results)
         competitors = []
         seen = set()
         for r in results:
@@ -71,6 +81,34 @@ def find_local_competitors(
                 competitors.append({"name": name, "url": url, "content": content})
         return competitors
     except Exception as e:
+        log.warning(f"Tavily find_local_competitors failed: {e}")
+        return []
+
+
+def tavily_search(query: str, max_results: int = 10) -> List[Dict]:
+    """
+    Generic Tavily search. Returns list of {title, url, content} dicts.
+    """
+    max_results = min(max_results, 10)
+    try:
+        results = _do_tavily_search(query, max_results)
+        out = []
+        seen_urls = set()
+        for r in results:
+            if not isinstance(r, dict):
+                continue
+            url = (r.get("url") or r.get("link") or "").strip()
+            if not url or url in seen_urls:
+                continue
+            seen_urls.add(url)
+            out.append({
+                "title": (r.get("title") or r.get("name") or "").strip(),
+                "url": url,
+                "content": (r.get("content") or r.get("snippet") or "").strip(),
+            })
+        return out
+    except Exception as e:
+        log.warning(f"Tavily search failed: {e}")
         return []
 
 
@@ -78,26 +116,11 @@ def get_services_from_reviews(competitor_name: str, city: str, niche: str = None
     """
     Tavily search for reviews when competitor has no scrapable website.
     Returns raw text from review snippets.
-    Guard: max_results=2, search_depth=basic (fallback only).
     """
+    niche = niche or "Junk Removal"
+    query = f'"{competitor_name}" {niche} reviews'
     try:
-        from tavily import TavilyClient
-        client = TavilyClient(api_key=TAVILY_API_KEY)
-        niche = niche or "Junk Removal"
-        query = f'"{competitor_name}" {niche} reviews'
-        response = client.search(
-            query,
-            max_results=TAVILY_REVIEWS_MAX_RESULTS,
-            search_depth=TAVILY_SEARCH_DEPTH,
-        )
-        results = []
-        if isinstance(response, dict):
-            results = response.get("results", [])
-        elif hasattr(response, "results"):
-            results = getattr(response, "results", None) or []
-        if not isinstance(results, list):
-            return ""
-
+        results = _do_tavily_search(query, TAVILY_REVIEWS_MAX_RESULTS)
         parts = []
         for r in results:
             c = r.get("content", r.get("snippet", ""))
@@ -105,4 +128,5 @@ def get_services_from_reviews(competitor_name: str, city: str, niche: str = None
                 parts.append(str(c))
         return " ".join(parts).strip() if parts else ""
     except Exception as e:
+        log.warning(f"Tavily get_services_from_reviews failed: {e}")
         return ""

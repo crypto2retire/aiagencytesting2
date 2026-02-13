@@ -80,9 +80,12 @@ def run_strategist(client_id: str) -> tuple[bool, str]:
     try:
         from agents.strategist import generate_strategy
         result = generate_strategy(client_id=resolved)
-        if not result or not result.get("draft_ids"):
-            return False, "No drafts created. Check logs/strategist.log — Ollama/Claude may have failed or output was too short."
-        return True, f"{len(result['draft_ids'])} drafts saved."
+        if not result:
+            return False, "Strategist produced no output. Check logs/strategist.log."
+        actions = result.get("action_count", 0)
+        pages = result.get("page_count", 0)
+        upsells = result.get("upsell_count", 0)
+        return True, f"Strategist done: {actions} actions, {pages} pages, {upsells} upsell flags."
     except Exception as e:
         return False, str(e)
 
@@ -136,7 +139,7 @@ def main():
         from agents.strategist import generate_strategy
         result = generate_strategy(client_id=resolved)
         print(f"Strategist done. {result}")
-        return 0 if result.get("draft_ids") else 1
+        return 0 if result else 1
 
     # Full pipeline
     if not args.client_id:

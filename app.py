@@ -3,6 +3,7 @@ Agency AI Dashboard — Outcomes over activity. Simple, calm, trustworthy.
 """
 
 import json
+import time
 import streamlit as st
 import sys
 from pathlib import Path
@@ -79,13 +80,18 @@ def page_overview(client_id, client, db):
     city_in = st.text_input("City for research", value=city if city != "—" else "", placeholder="e.g. Phoenix AZ", key=f"overview_city_{client_id}")
     r1, r2, _ = st.columns([1, 1, 4])
     with r1:
-        if st.button("▶ Run Research", type="primary"):
+        def _trigger_run_research():
             c = (city_in or "").strip() or city
             if c and c != "—":
                 st.session_state["run_researcher"] = (client_id, c)
-                st.rerun()
             else:
-                st.error("Enter a city for research.")
+                st.session_state["run_research_error"] = "Enter a city for research."
+
+        if st.button("▶ Run Research", type="primary", on_click=_trigger_run_research, key=f"run_research_btn_{client_id}"):
+            pass  # Callback handles it; Streamlit reruns automatically
+        err = st.session_state.pop("run_research_error", None)
+        if err:
+            st.error(err)
     with r2:
         if st.button("▶ Find Opportunities"):
             st.session_state["run_strategist"] = client_id
@@ -168,21 +174,90 @@ def page_market_intelligence(client_id, client, db):
 
     st.subheader("Market Intelligence")
     logs = db.query(ResearchLog).filter(ResearchLog.client_id == client_id).order_by(ResearchLog.confidence_score.desc()).all()
+    snapshots = db.query(MarketSnapshot).filter(MarketSnapshot.client_id == client_id).order_by(MarketSnapshot.created_at.desc()).limit(3).all()
+
+    # Market snapshot summary (aggregated view)
+    if snapshots:
+        with st.expander("📊 Market snapshot summary", expanded=True):
+            for snap in snapshots:
+                snap_city = snap.city or "—"
+                st.markdown(f"**{snap_city}** · {snap.snapshot_date or 'Recent'}")
+                if snap.strong_competitors:
+                    st.markdown("**Strong competitors** · " + ", ".join(snap.strong_competitors[:8]))
+                if snap.weak_competitors:
+                    st.markdown("**Weak competitors** · " + ", ".join(snap.weak_competitors[:8]))
+                if snap.content_gaps:
+                    st.markdown("**Content gaps**")
+                    for g in snap.content_gaps[:5]:
+                        st.markdown(f"- {g}")
+                if snap.common_messaging_themes:
+                    st.markdown("**Common themes** · " + ", ".join(snap.common_messaging_themes[:5]))
+                st.divider()
 
     if not logs:
         st.info("No market data yet. Refresh market data from Overview or Settings.")
         return
 
+    st.markdown("---")
+    st.markdown("**Competitor details**")
     for rl in logs:
         presence = "Website" if rl.source_type == "website" else "Google Only"
-        services = ", ".join((rl.extracted_services or [])[:5]) or "General services"
-        weakness = ", ".join(rl.missed_opportunities or rl.complaints or ["—"])[:60] or "—"
-        conf = "High" if rl.confidence_score >= 70 else ("Medium" if rl.confidence_score >= 50 else "Low")
-        with st.expander(f"**{rl.competitor_name}** | {presence} | {conf}"):
-            st.markdown("**Services mentioned** · " + services)
-            st.markdown("**Weakness / gap** · " + weakness)
-            if rl.complaints:
-                st.caption("Customer feedback: " + ", ".join(rl.complaints[:3]))
+        conf = "High" if (rl.confidence_score or 0) >= 70 else ("Medium" if (rl.confidence_score or 0) >= 50 else "Low")
+        score_str = ""
+        if rl.website_quality_score is not None or rl.competitor_comparison_score is not None:
+            parts = []
+            if rl.website_quality_score is not None:
+                parts.append(f"Quality: {rl.website_quality_score}")
+            if rl.competitor_comparison_score is not None:
+                parts.append(f"Comparison: {rl.competitor_comparison_score:.0f}" if isinstance(rl.competitor_comparison_score, float) else f"Comparison: {rl.competitor_comparison_score}")
+            score_str = " · " + " | ".join(parts)
+        with st.expander(f"**{rl.competitor_name}** | {presence} | {conf}{score_str}"):
+            # Services (full list)
+            services = (rl.extracted_services or []) or ["General services"]
+            st.markdown("**Services mentioned** · " + ", ".join(services))
+            # Pricing
+            if rl.pricing_mentions:
+                st.markdown("**Pricing mentions** · " + ", ".join(rl.pricing_mentions))
+            # Weaknesses / missed opportunities
+            missed = rl.missed_opportunities or []
+            complaints = rl.complaints or []
+            if missed or complaints:
+                all_gaps = list(missed) + list(complaints)
+                st.markdown("**Weaknesses / gaps**")
+                for g in all_gaps:
+                    st.markdown(f"- {g}")
+            else:
+                st.markdown("**Weaknesses / gaps** · —")
+            # extracted_profile details
+            profile = rl.extracted_profile or {}
+            if profile:
+                with st.expander("📋 Detailed profile", expanded=False):
+                    if profile.get("trust_signals") and isinstance(profile["trust_signals"], dict):
+                        ts = profile["trust_signals"]
+                        st.markdown("**Trust signals**")
+                        for k, v in ts.items():
+                            st.markdown(f"- *{k}*: {v}")
+                    elif profile.get("local_trust_signals"):
+                        st.markdown("**Local trust** · " + ", ".join(str(s) for s in profile["local_trust_signals"][:10]))
+                    if profile.get("content_signals") and isinstance(profile["content_signals"], dict):
+                        cs = profile["content_signals"]
+                        st.markdown("**Content signals**")
+                        for k, v in cs.items():
+                            if isinstance(v, list):
+                                st.markdown(f"- *{k}*: {', '.join(str(x) for x in v[:8])}")
+                            else:
+                                st.markdown(f"- *{k}*: {v}")
+                    if profile.get("seo_keywords"):
+                        st.markdown("**SEO keywords** · " + ", ".join(profile["seo_keywords"][:15]))
+                    if profile.get("service_city_phrases"):
+                        st.markdown("**Service–city phrases** · " + ", ".join(profile["service_city_phrases"][:15]))
+            # City context
+            if rl.city:
+                st.caption(f"📍 Research context: {rl.city}")
+            # Raw text (collapsible)
+            if rl.raw_text:
+                with st.expander("📜 View raw research text", expanded=False):
+                    st.text(rl.raw_text[:5000] + ("…" if len(rl.raw_text or "") > 5000 else ""))
 
 
 # ─── Opportunities ─────────────────────────────────────────────────────────
@@ -649,42 +724,57 @@ def page_add_client(db):
 # ─── Main ─────────────────────────────────────────────────────────────────
 
 def main():
-    st.sidebar.title("Agency AI")
-    st.sidebar.caption("Outcomes over activity.")
-
     db = SessionLocal()
     try:
         clients = db.query(Client).all()
 
-        # Run Researcher (from Settings or new client)
+        # Run Researcher — must run BEFORE any rendering so the trigger is processed
         if st.session_state.get("run_researcher"):
             cid, city = st.session_state.pop("run_researcher")
-            st.session_state["client_select"] = cid  # Stay on this client after run
-            with st.status("Refreshing market data…"):
+            st.session_state["client_select"] = cid
+            st.sidebar.title("Agency AI")
+            st.sidebar.caption("Outcomes over activity.")
+            with st.status("Refreshing market data…", expanded=True):
                 ok, msg = run_researcher(cid, city)
                 if ok:
                     st.success(msg)
                 else:
                     st.error(msg)
+                    st.info("This message will dismiss in 10 seconds…")
+                    time.sleep(10)
             st.rerun()
         if st.session_state.get("run_researcher_new"):
             cid, city = st.session_state.pop("run_researcher_new")
-            st.session_state["client_select"] = cid  # Stay on new client after run
-            with st.status("Refreshing market data…"):
-                run_researcher(cid, city)
+            st.session_state["client_select"] = cid
+            st.sidebar.title("Agency AI")
+            st.sidebar.caption("Outcomes over activity.")
+            with st.status("Refreshing market data…", expanded=True):
+                ok, msg = run_researcher(cid, city)
+                if not ok:
+                    st.error(msg)
+                    st.info("This message will dismiss in 10 seconds…")
+                    time.sleep(10)
             st.rerun()
 
         # Run Strategist
         if st.session_state.get("run_strategist"):
             cid = st.session_state.pop("run_strategist")
-            st.session_state["client_select"] = cid  # Stay on this client after run
-            with st.status("Finding opportunities…"):
+            st.session_state["client_select"] = cid
+            st.sidebar.title("Agency AI")
+            st.sidebar.caption("Outcomes over activity.")
+            with st.status("Finding opportunities…", expanded=True):
                 ok, msg = run_strategist(cid)
                 if ok:
                     st.success(msg)
                 else:
                     st.error(msg)
+                    st.info("This message will dismiss in 10 seconds…")
+                    time.sleep(10)
             st.rerun()
+
+        # Render full UI
+        st.sidebar.title("Agency AI")
+        st.sidebar.caption("Outcomes over activity.")
 
         if not clients:
             page_add_client(db)

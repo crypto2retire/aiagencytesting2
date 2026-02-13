@@ -75,6 +75,18 @@ python3 main.py --strategist-only YOUR_CLIENT_ID
 - `agents/researcher.py` — market research, saves to DB
 - `agents/strategist.py` — scoring + drafting + differentiation, saves to DB
 - `database.py` — SQLAlchemy models
+- `client_portal.py` — read-only client portal (magic-link access)
+- `client_portal_access.py` — portal data layer (read-only, client-scoped)
+
+## Client Portal
+
+Share a read-only dashboard with clients via magic links:
+
+1. In the main app, go to **Settings** → **Client Portal** → set base URL and generate a link
+2. Run the portal: `streamlit run client_portal.py` (typically on port 8502)
+3. Share the generated URL (e.g. `http://your-host:8502?token=...`) with the client
+
+Clients see: Overview, Competitive Position, Opportunities, Content & SEO Progress, Website Health, Roadmap.
 
 ## Remote Access
 

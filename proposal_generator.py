@@ -133,3 +133,87 @@ Run market research and opportunity scoring to populate recommendations.
     sections.append("We recommend launching content and local optimization for these services first to capture demand quickly and build authority.")
 
     return "\n".join(sections)
+
+
+def generate_ai_sales_proposal(client_id: str, db, status: str = "DRAFT") -> Optional[dict]:
+    """
+    Gather client data, call Ollama generate_sales_proposal, return result or None.
+    Saves to SalesProposal table if successful.
+    status: 'DRAFT' | 'READY'
+    """
+    from database import Client, GeoPhrase, KeywordIntelligence, ResearchLog, ClientRoadmap, GeoPageOutline, SalesProposal
+    from agents.ollama_client import generate_sales_proposal
+    from sqlalchemy import func, or_
+
+    client = db.query(Client).filter(func.lower(Client.client_id) == client_id.lower()).first()
+    if not client:
+        return None
+
+    cities = (client.cities_served or [])[:5]
+    regions = [c.lower() for c in cities if c]
+
+    # Geo phrases: GeoPhrase or KeywordIntelligence with geo_phrase
+    geo_phrases = []
+    for row in db.query(GeoPhrase).filter(GeoPhrase.geo_phrase.isnot(None)).order_by(GeoPhrase.confidence_score.desc().nullslast()).limit(15).all():
+        geo_phrases.append({"geo_phrase": row.geo_phrase, "confidence_score": row.confidence_score})
+    if not geo_phrases:
+        kw_geo = db.query(KeywordIntelligence).filter(
+            KeywordIntelligence.geo_phrase.isnot(None),
+            or_(KeywordIntelligence.client_id.is_(None), KeywordIntelligence.client_id == client_id),
+        ).order_by(KeywordIntelligence.keyword_confidence_score.desc().nullslast()).limit(10).all()
+        for k in kw_geo:
+            geo_phrases.append({"geo_phrase": k.geo_phrase, "confidence_score": k.keyword_confidence_score or 0})
+
+    # Keywords: top by keyword_confidence_score
+    keywords = []
+    for k in db.query(KeywordIntelligence).filter(
+        or_(KeywordIntelligence.client_id.is_(None), KeywordIntelligence.client_id == client_id),
+    ).order_by(KeywordIntelligence.keyword_confidence_score.desc().nullslast()).limit(15).all():
+        keywords.append({"keyword": k.keyword, "confidence_score": k.keyword_confidence_score or 0})
+
+    # Competitor coverage & quality
+    logs = db.query(ResearchLog).filter(ResearchLog.client_id == client_id).order_by(ResearchLog.created_at.desc()).limit(20).all()
+    comp_lines = []
+    client_avg = getattr(client, "avg_page_quality_score", None)
+    for rl in logs:
+        q = getattr(rl, "competitor_comparison_score", None) or rl.website_quality_score or 0
+        name = (rl.extracted_profile or {}).get("company_name") or rl.competitor_name
+        comp_lines.append(f"  • {name}: {q}/100")
+    competitor_coverage = "\n".join(comp_lines) if comp_lines else "  (none)"
+
+    # Content roadmap: ClientRoadmap + GeoPageOutline
+    roadmap_parts = []
+    for r in db.query(ClientRoadmap).filter(ClientRoadmap.client_id == client_id).order_by(ClientRoadmap.priority.asc().nullslast()).limit(10).all():
+        roadmap_parts.append(f"  • [{r.priority}] {r.title or r.description or ''}")
+    for o in db.query(GeoPageOutline).filter(GeoPageOutline.client_id == client_id).order_by(GeoPageOutline.confidence_score.desc().nullslast()).limit(10).all():
+        roadmap_parts.append(f"  • {o.geo_phrase or o.service or ''} — {o.page_status or 'DRAFT'} (conf: {o.confidence_score or 0:.0%})")
+    content_roadmap = "\n".join(roadmap_parts) if roadmap_parts else "  (none)"
+
+    try:
+        result = generate_sales_proposal(
+            client_name=client.business_name or "",
+            city=", ".join(cities[:3]) if cities else "",
+            niche=getattr(client, "client_vertical", "") or "",
+            website=client.website_url or "",
+            geo_phrases=geo_phrases,
+            keywords=keywords,
+            competitor_coverage=competitor_coverage,
+            content_roadmap=content_roadmap,
+        )
+    except Exception:
+        return None
+    if not result:
+        return None
+
+    # Save to SalesProposal
+    prop = SalesProposal(
+        client_id=client_id,
+        summary=result.get("summary") or "",
+        opportunity_list=result.get("opportunity_list") or [],
+        estimated_impact=result.get("estimated_impact") or {},
+        generated_document=result.get("generated_document") or "",
+        status=status,
+    )
+    db.add(prop)
+    db.commit()
+    return result

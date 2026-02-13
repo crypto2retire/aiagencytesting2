@@ -57,12 +57,15 @@ RESEARCHER_LOG = str(LOGS_DIR / "researcher.log")
 STRATEGIST_LOG = str(LOGS_DIR / "strategist.log")
 OPPORTUNITY_LOG = str(LOGS_DIR / "opportunity_scorer.log")
 KEYWORD_CLASSIFIER_LOG = str(LOGS_DIR / "keyword_classifier.log")
+PERFORMANCE_LOG = str(LOGS_DIR / "performance.log")
 
-# ─── Cost + Latency Guards (non-negotiable) ─────────────────────────────────
+# ─── Researcher / LLM settings ───────────────────────────────────────────────
 TAVILY_MAX_RESULTS = 5
 TAVILY_SEARCH_DEPTH = "basic"
 TAVILY_REVIEWS_MAX_RESULTS = 2
 FIRECRAWL_TIMEOUT = 30
 OLLAMA_TIMEOUT = 45
 OLLAMA_STREAM = False
+OLLAMA_FALLBACK_ON_TIMEOUT = True  # Deprecated: kept for import compat; no longer used by llm.py
 SLEEP_BETWEEN_COMPETITORS = 2
+RESEARCHER_MAX_PAGES_PER_SITE = int(os.getenv("RESEARCHER_MAX_PAGES_PER_SITE", "6"))
