@@ -10,21 +10,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ─── Required API keys (fail loudly if missing) ───────────────────────────
+# ─── Required API keys ───────────────────────────────────────────────────
 REQUIRED_KEYS = ["TAVILY_API_KEY", "FIRECRAWL_API_KEY", "ANTHROPIC_API_KEY"]
 
 
 def _validate_required():
-    for key in REQUIRED_KEYS:
-        val = os.getenv(key, "").strip()
-        if not val:
-            raise RuntimeError(
-                f"Missing required config: {key}. Set it in .env. See .env.example."
-            )
+    """Raise if any required key is missing. Call when running research/strategist."""
+    missing = [k for k in REQUIRED_KEYS if not os.getenv(k, "").strip()]
+    if missing:
+        raise RuntimeError(
+            f"Missing required config: {', '.join(missing)}. "
+            "Set in .env locally, or in Streamlit Cloud: Manage app → Settings → Secrets."
+        )
 
 
-# Validate on import — fail loudly
-_validate_required()
+def has_required_config() -> bool:
+    """True if all required API keys are set."""
+    return all(bool(os.getenv(k, "").strip()) for k in REQUIRED_KEYS)
 
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "").strip()
 FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY", "").strip()

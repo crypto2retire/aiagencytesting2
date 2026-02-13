@@ -11,6 +11,7 @@ from itertools import groupby
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from config import has_required_config
 from database import init_db, SessionLocal, Client, ContentStrategy, KeywordIntelligence, MarketSnapshot, Opportunity, OpportunityScore, ContentDraft, ResearchLog
 from main import run_keyword_classifier, run_researcher, run_strategist
 from agents.keyword_extractor import store_keywords
@@ -724,6 +725,30 @@ def page_add_client(db):
 # ─── Main ─────────────────────────────────────────────────────────────────
 
 def main():
+    if not has_required_config():
+        st.title("📋 Agency AI — Setup Required")
+        st.markdown("""
+        Configure your API keys to run the app.
+
+        **On Streamlit Cloud:**
+        1. Open your app
+        2. Click **Manage app** (lower right)
+        3. Go to **Settings** → **Secrets**
+        4. Add these keys:
+
+        ```
+        TAVILY_API_KEY = your-tavily-api-key
+        FIRECRAWL_API_KEY = your-firecrawl-api-key
+        ANTHROPIC_API_KEY = your-anthropic-api-key
+        ```
+
+        5. Save and redeploy.
+
+        **Locally:** Copy `.env.example` to `.env` and fill in the values.
+        """)
+        st.info("After adding secrets, the app will redeploy automatically.")
+        return
+
     db = SessionLocal()
     try:
         clients = db.query(Client).all()

@@ -28,6 +28,8 @@ def _resolve_client_id(client_id: str) -> Optional[str]:
 
 def run_researcher(client_id: str, city: str = None) -> tuple[bool, str]:
     """Run Researcher only. Returns (success, message)."""
+    from config import _validate_required
+    _validate_required()
     try:
         resolved = _resolve_client_id(client_id)
         if not resolved:
@@ -56,6 +58,8 @@ def run_keyword_classifier(region: str, client_id: str = None) -> tuple[bool, st
 
 def run_strategist(client_id: str) -> tuple[bool, str]:
     """Run Strategist only (reads research_logs). Returns (success, message)."""
+    from config import _validate_required
+    _validate_required()
     from sqlalchemy import func
     from config import MIN_CONFIDENCE_FOR_STRATEGIST
 
